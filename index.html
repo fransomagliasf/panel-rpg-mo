@@ -15,6 +15,25 @@
       </div>
     </div>
     <noscript>MO Tracker necesita JavaScript habilitado para funcionar.</noscript>
-    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      (function () {
+        function showBootError(message) {
+          var root = document.getElementById('root')
+          if (!root || root.dataset.booted === 'true') return
+          root.innerHTML = '<div style="min-height:100vh;display:grid;place-items:center;background:#0c110d;color:#e7ede7;font-family:system-ui,sans-serif;padding:24px;text-align:center"><div><strong>No se pudo iniciar MO Tracker</strong><p style="color:#a7b4aa">' + String(message) + '</p></div></div>'
+        }
+        window.moTrackerBootError = showBootError
+        window.addEventListener('error', function (event) {
+          showBootError(event.message || 'El navegador no pudo ejecutar la aplicación.')
+        })
+        window.addEventListener('unhandledrejection', function () {
+          showBootError('Ocurrió un error al iniciar la aplicación.')
+        })
+        window.setTimeout(function () {
+          showBootError('El archivo JavaScript no respondió. Probá actualizar el navegador o desactivar temporalmente el bloqueador de contenido.')
+        }, 8000)
+      })()
+    </script>
+    <script type="module" src="/src/main.tsx" onerror="window.moTrackerBootError('No se pudo descargar el archivo JavaScript de la aplicación.')"></script>
   </body>
 </html>
