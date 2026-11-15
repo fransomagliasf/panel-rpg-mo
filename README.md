@@ -53,7 +53,7 @@ Revisá los cambios generados en `public/data/` antes de publicarlos.
 3. En **Build and deployment**, elegir **GitHub Actions**.
 4. El workflow `Deploy GitHub Pages` ejecutará tests, compilará y publicará el sitio en cada push a `main`.
 
-Vite usa rutas relativas y navegación por hash, por lo que funciona bajo `https://<usuario>.github.io/panel-rpg-mo/` sin configurar un dominio base.
+Vite usa la base `/panel-rpg-mo/` y navegación por hash para funcionar en `https://<usuario>.github.io/panel-rpg-mo/`.
 
 ## Criterios y límites
 
