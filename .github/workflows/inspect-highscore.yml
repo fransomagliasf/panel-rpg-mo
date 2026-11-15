@@ -12,13 +12,13 @@ jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Fetch public highscore page
+      - name: Fetch Broar's public highscore data
         shell: bash
         run: |
           curl --fail --silent --show-error --location --max-time 30 \
             --user-agent 'Mozilla/5.0 MO-Tracker/1.0' \
-            https://mo.ee/highscore.html -o /tmp/rpg-mo-highscore.html
-          gzip --stdout --best /tmp/rpg-mo-highscore.html | base64 --wrap=0 | fold --width=3500 | nl -ba | \
+            'https://rpg-de2.mo.ee/playerskills?n=Broar' -o /tmp/rpg-mo-player.json
+          gzip --stdout --best /tmp/rpg-mo-player.json | base64 --wrap=0 | fold --width=3500 | nl -ba | \
             while read -r part payload; do
               echo "::notice title=highscore-${part}::${payload}"
             done
