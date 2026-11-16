@@ -1,6 +1,7 @@
 import { Search, ShieldCheck, Trash2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorMessage, Loading, StatCard } from '../components/Ui'
+import { GameImage } from '../components/GameImage'
 import { loadItems } from '../lib/data'
 import type { Item } from '../types'
 
@@ -44,7 +45,10 @@ export function Sets() {
           <div className="slot-grid">
             {visibleSlots.map((slot) => {
               const item = items.find((candidate) => candidate.id === selected[slot])
-              return <button key={slot} className={`slot-card ${activeSlot === slot ? 'active' : ''}`} onClick={() => { setActiveSlot(slot); setQuery('') }}><span>{slot}</span><strong>{item?.name || 'Vacío'}</strong>{item && <small>#{item.id}</small>}</button>
+              return <button key={slot} className={`slot-card ${activeSlot === slot ? 'active' : ''}`} onClick={() => { setActiveSlot(slot); setQuery('') }}>
+                {item && <GameImage kind="items" id={item.id} name={item.name} className="slot-sprite" />}
+                <span className="slot-copy"><span>{slot}</span><strong>{item?.name || 'Vacío'}</strong>{item && <small>#{item.id}</small>}</span>
+              </button>
             })}
           </div>
           <div className="set-footer">
@@ -56,7 +60,7 @@ export function Sets() {
           <div className="panel-heading"><div><span className="eyebrow">{activeSlot.toUpperCase()}</span><h3>Elegir pieza</h3></div></div>
           <div className="small-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Buscar para ${activeSlot}…`} /></div>
           <div className="picker-list">
-            {candidates.map((item) => <button key={item.id} className={selected[activeSlot] === item.id ? 'selected' : ''} onClick={() => setSelected({ ...selected, [activeSlot]: item.id })}><div><strong>{item.name}</strong><span>#{item.id} · {Object.entries(item.stats).slice(0, 3).map(([name, value]) => `${name} ${value > 0 ? '+' : ''}${value}`).join(' · ') || 'Sin stats'}</span></div><span>Equipar</span></button>)}
+            {candidates.map((item) => <button key={item.id} className={selected[activeSlot] === item.id ? 'selected' : ''} onClick={() => setSelected({ ...selected, [activeSlot]: item.id })}><GameImage kind="items" id={item.id} name={item.name} className="picker-sprite" /><div><strong>{item.name}</strong><span>#{item.id} · {Object.entries(item.stats).slice(0, 3).map(([name, value]) => `${name} ${value > 0 ? '+' : ''}${value}`).join(' · ') || 'Sin stats'}</span></div><span>Equipar</span></button>)}
           </div>
         </section>
       </div>

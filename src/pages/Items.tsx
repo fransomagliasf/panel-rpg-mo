@@ -1,6 +1,7 @@
 import { Filter, Search, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorMessage, Loading } from '../components/Ui'
+import { GameImage } from '../components/GameImage'
 import { loadItems } from '../lib/data'
 import { formatNumber } from '../lib/calculations'
 import type { Item } from '../types'
@@ -55,7 +56,7 @@ export function ItemCard({ item, compact = false }: { item: Item; compact?: bool
   const requirements = Object.entries(item.requirements).filter(([, value]) => value > 0)
   return (
     <article className={`item-card ${compact ? 'compact' : ''}`}>
-      <div className="item-card-top"><div className="item-glyph">{item.category.slice(0, 1)}</div><div><span>#{item.id} · {item.category}</span><h3>{item.name}</h3></div></div>
+      <div className="item-card-top"><GameImage kind="items" id={item.id} name={item.name} className="item-glyph" /><div><span>#{item.id} · {item.category}</span><h3>{item.name}</h3></div></div>
       <div className="item-meta"><span>{item.slot !== 'None' ? item.slot : 'Sin ranura'}</span>{item.price !== undefined && <span>{formatNumber(item.price)} 🪙</span>}</div>
       {!!stats.length && <div className="stat-chips">{stats.slice(0, 6).map(([name, value]) => <span key={name}><small>{name}</small><strong>{value > 0 ? '+' : ''}{value}</strong></span>)}</div>}
       {!!requirements.length && <p className="requirements">Requiere {requirements.map(([name, value]) => `${name} ${value}`).join(' · ')}</p>}

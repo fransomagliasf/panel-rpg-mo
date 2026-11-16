@@ -1,6 +1,7 @@
 import { FlaskConical, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorMessage, Loading, StatCard } from '../components/Ui'
+import { GameImage } from '../components/GameImage'
 import { formatNumber, totalXpForLevel } from '../lib/calculations'
 import { loadRecipes } from '../lib/data'
 import type { Recipe } from '../types'
@@ -39,7 +40,7 @@ export function Professions() {
         <section className="panel recipe-browser">
           <div className="field-row"><label>Oficio<select value={skill} onChange={(event) => { setSkill(event.target.value); setSelectedId(-1) }}>{skills.map((name) => <option key={name}>{name}</option>)}</select></label></div>
           <div className="small-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar receta o acción…" /></div>
-          <div className="recipe-list">{filtered.map((recipe) => <button key={`${recipe.skill}-${recipe.id}-${recipe.station}`} className={selected?.id === recipe.id ? 'selected' : ''} onClick={() => setSelectedId(recipe.id)}><div><strong>{recipe.name}</strong><span>Nivel {recipe.level} · {recipe.xp} XP · {recipe.station}</span></div></button>)}</div>
+          <div className="recipe-list">{filtered.map((recipe) => <button key={`${recipe.skill}-${recipe.id}-${recipe.station}`} className={selected?.id === recipe.id ? 'selected' : ''} onClick={() => setSelectedId(recipe.id)}><GameImage kind="items" id={recipe.id} name={recipe.name} className="picker-sprite" /><div><strong>{recipe.name}</strong><span>Nivel {recipe.level} · {recipe.xp} XP · {recipe.station}</span></div></button>)}</div>
         </section>
         <section className="stack-lg">
           <section className="panel">
@@ -56,7 +57,7 @@ export function Professions() {
           </section>
           <section className="panel">
             <div className="panel-heading"><div><span className="eyebrow">LISTA DE MATERIALES</span><h3>Para el objetivo</h3></div></div>
-            {selected?.materials.length ? <div className="materials-list">{selected.materials.map((material) => <div key={material.id}><div className="material-glyph">{material.name.slice(0, 1)}</div><div><strong>{material.name}</strong><span>{material.count} por intento</span></div><strong>{formatNumber(material.count * attempts)}</strong></div>)}</div> : <div className="info-callout"><p>Esta acción no tiene materiales estructurados en los datos (suele ser una actividad de recolección). Necesitarías aproximadamente <strong>{formatNumber(attempts)}</strong> acciones exitosas.</p></div>}
+            {selected?.materials.length ? <div className="materials-list">{selected.materials.map((material) => <div key={material.id}><GameImage kind="items" id={material.id} name={material.name} className="material-glyph" /><div><strong>{material.name}</strong><span>{material.count} por intento</span></div><strong>{formatNumber(material.count * attempts)}</strong></div>)}</div> : <div className="info-callout"><p>Esta acción no tiene materiales estructurados en los datos (suele ser una actividad de recolección). Necesitarías aproximadamente <strong>{formatNumber(attempts)}</strong> acciones exitosas.</p></div>}
           </section>
         </section>
       </div>

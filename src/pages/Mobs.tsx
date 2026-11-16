@@ -1,6 +1,7 @@
 import { Crosshair, Info, Search, Swords } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorMessage, Loading, StatCard } from '../components/Ui'
+import { GameImage } from '../components/GameImage'
 import { combatXp, formatNumber, type FightStyle } from '../lib/calculations'
 import { loadMobs } from '../lib/data'
 import type { Mob } from '../types'
@@ -35,13 +36,13 @@ export function Mobs() {
           <div className="panel-heading"><div><span className="eyebrow">BESTIARIO</span><h3>Elegí un mob</h3></div><Crosshair size={20} /></div>
           <div className="small-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar mob…" /></div>
           <div className="mob-list">
-            {filtered.map((mob) => <button key={mob.id} className={selected.id === mob.id ? 'selected' : ''} onClick={() => setSelectedId(mob.id)}><div className="mob-level">{mob.combatLevel}</div><div><strong>{mob.name}</strong><span>{mob.health} HP · {mob.locations.slice(0, 2).join(', ') || 'Sin ubicación'}</span></div></button>)}
+            {filtered.map((mob) => <button key={mob.id} className={selected.id === mob.id ? 'selected' : ''} onClick={() => setSelectedId(mob.id)}><GameImage kind="mobs" id={mob.id} name={mob.name} className="mob-thumb" /><div className="mob-level">{mob.combatLevel}</div><div><strong>{mob.name}</strong><span>{mob.health} HP · {mob.locations.slice(0, 2).join(', ') || 'Sin ubicación'}</span></div></button>)}
           </div>
         </section>
         <section className="stack-lg">
           <div className="mob-hero panel">
             <div><span className="eyebrow">MOB SELECCIONADO</span><h2>{selected.name}</h2><p>{selected.locations.join(' · ') || 'Ubicación no informada'}</p></div>
-            <div className="mob-level-big"><span>LVL</span><strong>{selected.combatLevel}</strong></div>
+            <div className="mob-visual"><GameImage kind="mobs" id={selected.id} name={selected.name} className="mob-portrait" eager /><div className="mob-level-big"><span>LVL</span><strong>{selected.combatLevel}</strong></div></div>
             <div className="mob-stats"><span><small>Health</small><strong>{selected.health}</strong></span><span><small>Accuracy</small><strong>{selected.accuracy}</strong></span><span><small>Strength</small><strong>{selected.strength}</strong></span><span><small>Defense</small><strong>{selected.defense}</strong></span></div>
           </div>
           <section className="panel">
