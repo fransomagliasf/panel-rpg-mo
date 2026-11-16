@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Home,
   Menu,
+  MapPinned,
   Swords,
   UserRound,
   X,
@@ -20,6 +21,7 @@ export const routes = [
   { id: 'items', label: 'Ítems', icon: Backpack },
   { id: 'sets', label: 'Armador de sets', icon: Swords },
   { id: 'mobs', label: 'XP por mob', icon: Calculator },
+  { id: 'mapa', label: 'Mapa', icon: MapPinned },
   { id: 'oficios', label: 'Oficios', icon: Boxes },
   { id: 'fuentes', label: 'Fuentes y ruta', icon: BookOpen },
 ] as const

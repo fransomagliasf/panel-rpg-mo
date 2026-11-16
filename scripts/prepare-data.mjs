@@ -10,6 +10,7 @@ const outputDirectory = path.join(root, 'public', 'data')
 const localSource = process.env.RPG_MO_WIKI_DIR
 const sourceRepository = 'https://github.com/marcqg/rpg-mo-wiki'
 const rawBase = 'https://raw.githubusercontent.com/marcqg/rpg-mo-wiki/main/data/game'
+const bobRawBase = 'https://raw.githubusercontent.com/marcqg/rpg-mo-wiki/main/data/rpgmobob'
 
 const categories = { 0: 'Armor', 1: 'Food', 2: 'Jewelry', 3: 'Material', 4: 'Tool', 5: 'Weapon', 6: 'Spell', 7: 'Pet Item', 8: 'House', 9: 'Archery' }
 const slots = { 0: 'Helmet', 1: 'Cape', 2: 'Chest', 3: 'Right Hand', 4: 'Left Hand', 5: 'Gloves', 6: 'Boots', 7: 'Amulet', 8: 'Ring', 9: 'None', 10: 'Magic', 11: 'Pants', 12: 'Pet', 16: 'Key', 20: 'Arrow', 21: 'Spirit' }
@@ -28,12 +29,22 @@ async function readSource(file) {
   return response.json()
 }
 
+async function readBobSource(file) {
+  if (localSource) return JSON.parse(await readFile(path.join(localSource, 'data', 'rpgmobob', file), 'utf8'))
+  const response = await fetch(`${bobRawBase}/${file}`)
+  if (!response.ok) throw new Error(`No se pudo descargar ${file}: HTTP ${response.status}`)
+  return response.json()
+}
+
 function selectedNumbers(params, fields) {
   return Object.fromEntries(Object.entries(fields).flatMap(([source, label]) => typeof params?.[source] === 'number' ? [[label, params[source]]] : []))
 }
 
 await mkdir(outputDirectory, { recursive: true })
-const [rawItems, rawMobs, rawRecipes] = await Promise.all([readSource('items.json'), readSource('mobs.json'), readSource('recipes.json')])
+const [rawItems, rawMobs, rawRecipes, rawWorldMap, rawFungi, rawFishing] = await Promise.all([
+  readSource('items.json'), readSource('mobs.json'), readSource('recipes.json'),
+  readBobSource('worldMap.json'), readBobSource('fungiculture.json'), readBobSource('fishingSpots.json'),
+])
 const itemNames = new Map(rawItems.map((item) => [item.id, item.n]))
 
 const items = rawItems.map((item) => {
@@ -74,6 +85,41 @@ const recipes = rawRecipes.filter((recipe) => recipe.skill && Number.isFinite(re
   materials: (recipe.matts ?? []).map((material) => ({ id: material.id, name: itemNames.get(material.id) ?? `Item #${material.id}`, count: material.c ?? 1 })),
 })).sort((a, b) => a.skill.localeCompare(b.skill) || a.level - b.level || a.name.localeCompare(b.name))
 
+const mapAreas = rawWorldMap.map((area) => ({
+  name: area.name,
+  ...(area.img ? { image: area.img } : {}),
+  ...(area.href ? { href: area.href } : {}),
+  coords: area.coords,
+}))
+
+const fungiResources = rawFungi.map((fungus) => ({
+  id: `fungus-${fungus.grows_id}`,
+  name: fungus.grows,
+  type: 'Fungicultura',
+  itemId: fungus.grows_id,
+  level: String(fungus.level),
+  locations: (fungus.locations ?? []).map((location) => ({ zone: location.l, count: location.n })),
+})).filter((resource) => resource.locations.length)
+
+const fishingResources = Object.entries(rawFishing).flatMap(([tool, groups]) => Object.entries(groups).map(([level, spots]) => ({
+  id: `fishing-${tool}-${level}`.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+  name: tool,
+  type: 'Pesca',
+  level,
+  locations: spots.map((spot) => ({
+    zone: spot.location,
+    label: spot.location,
+    coords: spot.coords?.trim(),
+    optimal: spot.optimal === 1,
+  })),
+})))
+
+const map = {
+  worldImage: 'https://res.cloudinary.com/rpgmobob/image/upload/v1551917219/maps/world_map_2021_march.png',
+  areas: mapAreas,
+  resources: [...fungiResources, ...fishingResources],
+}
+
 let sourceCommit = 'main'
 if (localSource) {
   try { sourceCommit = (await execFileAsync('git', ['-C', localSource, 'rev-parse', 'HEAD'])).stdout.trim() } catch { /* metadata remains main */ }
@@ -83,10 +129,10 @@ const meta = {
   generatedAt: new Date().toISOString(),
   sourceRepository,
   sourceCommit,
-  counts: { items: items.length, mobs: mobs.length, recipes: recipes.length },
+  counts: { items: items.length, mobs: mobs.length, recipes: recipes.length, mapAreas: mapAreas.length, resources: map.resources.length },
 }
 
-for (const [file, data] of Object.entries({ 'items.json': items, 'mobs.json': mobs, 'recipes.json': recipes, 'meta.json': meta })) {
+for (const [file, data] of Object.entries({ 'items.json': items, 'mobs.json': mobs, 'recipes.json': recipes, 'map.json': map, 'meta.json': meta })) {
   await writeFile(path.join(outputDirectory, file), `${JSON.stringify(data)}\n`)
 }
 

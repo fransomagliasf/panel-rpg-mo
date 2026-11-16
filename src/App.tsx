@@ -4,6 +4,7 @@ import { useLocalStorage } from './lib/storage'
 import { Dashboard } from './pages/Dashboard'
 import { Items } from './pages/Items'
 import { Mobs } from './pages/Mobs'
+import { WorldMap } from './pages/WorldMap'
 import { Player } from './pages/Player'
 import { Professions } from './pages/Professions'
 import { Sets } from './pages/Sets'
@@ -46,6 +47,7 @@ export default function App() {
     items: <Items />,
     sets: <Sets />,
     mobs: <Mobs />,
+    mapa: <WorldMap />,
     oficios: <Professions />,
     fuentes: <Sources />,
   }[route]

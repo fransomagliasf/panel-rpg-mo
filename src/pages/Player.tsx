@@ -1,18 +1,21 @@
-import { Clock3, ExternalLink, RefreshCw, Trophy } from 'lucide-react'
+import { Clock3, ExternalLink, RefreshCw, ShieldCheck, Trophy } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { GameImage } from '../components/GameImage'
 import { EmptyState, StatCard } from '../components/Ui'
 import { formatNumber } from '../lib/calculations'
-import { loadPlayerHistory } from '../lib/data'
+import { loadItems, loadPlayerHistory } from '../lib/data'
+import { equippedItems, loadEquippedSelection, sumItemStats } from '../lib/equipment'
 import { boardLabels, dailySnapshots, findBoard, levelChanges, totalXp } from '../lib/player'
-import type { PlayerHistory } from '../types'
+import type { Item, PlayerHistory } from '../types'
 
 export function Player() {
   const [history, setHistory] = useState<PlayerHistory | null>(null)
+  const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
 
   useEffect(() => {
-    loadPlayerHistory('Broar')
-      .then(setHistory)
+    Promise.all([loadPlayerHistory('Broar'), loadItems()])
+      .then(([playerHistory, itemData]) => { setHistory(playerHistory); setItems(itemData) })
       .catch(() => setError('No se pudo cargar el historial automático de Broar.'))
   }, [])
 
@@ -25,6 +28,8 @@ export function Player() {
   const totalXpBoard = findBoard(current, 'total_xp')
   const gainedLevels = current ? levelChanges(current, previous) : []
   const visibleBoards = current?.boards.filter((entry) => !['total', 'total_xp'].includes(entry.board)) ?? []
+  const equipped = useMemo(() => equippedItems(items, loadEquippedSelection()), [items])
+  const equipmentStats = useMemo(() => sumItemStats(equipped), [equipped])
 
   if (error) return <EmptyState title="No pudimos sincronizar el personaje" text={error} />
   if (!history || !current) return <section className="panel loading-panel"><RefreshCw className="spin" size={22} /> Cargando a Broar…</section>
@@ -48,6 +53,14 @@ export function Player() {
         <StatCard label="XP total" value={formatNumber(currentXp)} detail={`Puesto #${formatNumber(totalXpBoard?.position ?? 0)}`} tone="gold" />
         <StatCard label="Desde la captura anterior" value={previous ? `+${formatNumber(captureGain)}` : 'Línea base'} detail="Precisión oficial: 100.000 XP" tone="violet" />
         <StatCard label="Niveles detectados" value={gainedLevels.reduce((sum, entry) => sum + entry.change, 0)} detail={gainedLevels.length ? gainedLevels.map((entry) => boardLabels[entry.board] ?? entry.board).join(', ') : 'Sin cambios desde la captura anterior'} tone="blue" />
+      </section>
+
+      <section className="panel character-set-panel">
+        <div className="panel-heading"><div><span className="eyebrow">EQUIPO VINCULADO</span><h3>Set actual de Broar</h3></div><ShieldCheck size={20} /></div>
+        {equipped.length ? <>
+          <div className="equipped-strip">{equipped.map((item) => <div key={item.id} title={item.name}><GameImage kind="items" id={item.id} name={item.name} className="equipped-sprite" /><span>{item.name}</span></div>)}</div>
+          <div className="character-set-footer"><span>{equipped.length} piezas equipadas</span><strong>Aim {equipmentStats.Aim || 0} · Power {equipmentStats.Power || 0} · Armor {equipmentStats.Armor || 0}</strong><button className="secondary-button" onClick={() => { window.location.hash = '/sets' }}>Editar set</button></div>
+        </> : <div className="empty-set-inline"><span>Todavía no cargaste el equipo de Broar.</span><button className="primary-button" onClick={() => { window.location.hash = '/sets' }}>Cargar set actual</button></div>}
       </section>
 
       <section className="panel">

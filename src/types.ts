@@ -38,6 +38,36 @@ export type Mob = {
   locations: string[]
 }
 
+export type MapArea = {
+  name: string
+  image?: string
+  href?: string
+  coords: string
+}
+
+export type MapResourceLocation = {
+  zone: string
+  label?: string
+  coords?: string
+  count?: number
+  optimal?: boolean
+}
+
+export type MapResource = {
+  id: string
+  name: string
+  type: 'Pesca' | 'Fungicultura'
+  itemId?: number
+  level?: string
+  locations: MapResourceLocation[]
+}
+
+export type MapData = {
+  worldImage: string
+  areas: MapArea[]
+  resources: MapResource[]
+}
+
 export type Recipe = {
   id: number
   name: string
@@ -54,7 +84,7 @@ export type GameDataMeta = {
   generatedAt: string
   sourceRepository: string
   sourceCommit: string
-  counts: { items: number; mobs: number; recipes: number }
+  counts: { items: number; mobs: number; recipes: number; mapAreas?: number; resources?: number }
 }
 
 export type PlayerBoard = {

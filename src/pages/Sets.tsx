@@ -4,6 +4,7 @@ import { ErrorMessage, Loading, StatCard } from '../components/Ui'
 import { GameImage } from '../components/GameImage'
 import { loadItems } from '../lib/data'
 import { itemInLevelRange } from '../lib/items'
+import { equippedItems, loadEquippedSelection, SET_STORAGE_KEY, sumItemStats } from '../lib/equipment'
 import type { Item } from '../types'
 
 const visibleSlots = ['Helmet', 'Cape', 'Chest', 'Pants', 'Gloves', 'Boots', 'Amulet', 'Ring', 'Left Hand', 'Right Hand', 'Magic', 'Pet', 'Arrow', 'Spirit']
@@ -11,7 +12,7 @@ const visibleSlots = ['Helmet', 'Cape', 'Chest', 'Pants', 'Gloves', 'Boots', 'Am
 export function Sets() {
   const [items, setItems] = useState<Item[]>([])
   const [error, setError] = useState('')
-  const [selected, setSelected] = useState<Record<string, number>>(() => JSON.parse(localStorage.getItem('mo-tracker-set') || '{}'))
+  const [selected, setSelected] = useState<Record<string, number>>(loadEquippedSelection)
   const [activeSlot, setActiveSlot] = useState('Helmet')
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Todas')
@@ -19,13 +20,10 @@ export function Sets() {
   const [maxLevel, setMaxLevel] = useState('')
 
   useEffect(() => { loadItems().then(setItems).catch((reason: Error) => setError(reason.message)) }, [])
-  useEffect(() => localStorage.setItem('mo-tracker-set', JSON.stringify(selected)), [selected])
+  useEffect(() => localStorage.setItem(SET_STORAGE_KEY, JSON.stringify(selected)), [selected])
 
-  const equipped = useMemo(() => visibleSlots.map((slot) => items.find((item) => item.id === selected[slot])).filter(Boolean) as Item[], [items, selected])
-  const totals = useMemo(() => equipped.reduce((sum, item) => {
-    Object.entries(item.stats).forEach(([name, value]) => { sum[name] = (sum[name] || 0) + value })
-    return sum
-  }, {} as Record<string, number>), [equipped])
+  const equipped = useMemo(() => equippedItems(items, selected), [items, selected])
+  const totals = useMemo(() => sumItemStats(equipped), [equipped])
   const requirements = useMemo(() => equipped.reduce((max, item) => {
     Object.entries(item.requirements).forEach(([name, value]) => { max[name] = Math.max(max[name] || 0, value) })
     return max
@@ -51,7 +49,7 @@ export function Sets() {
       </section>
       <div className="content-grid set-layout">
         <section className="panel">
-          <div className="panel-heading"><div><span className="eyebrow">EQUIPO</span><h3>Tu set</h3></div><ShieldCheck size={20} /></div>
+          <div className="panel-heading"><div><span className="eyebrow">EQUIPO DE BROAR</span><h3>Set actual</h3></div><ShieldCheck size={20} /></div>
           <div className="slot-grid">
             {visibleSlots.map((slot) => {
               const item = items.find((candidate) => candidate.id === selected[slot])
