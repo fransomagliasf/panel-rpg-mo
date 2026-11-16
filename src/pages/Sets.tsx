@@ -2,6 +2,7 @@ import { Search, ShieldCheck, Sparkles, Trash2, X } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorMessage, Loading, StatCard } from '../components/Ui'
 import { GameImage } from '../components/GameImage'
+import { ItemHoverCard } from '../components/ItemHoverCard'
 import { loadItems } from '../lib/data'
 import { itemInLevelRange } from '../lib/items'
 import { EQUIPMENT_SLOTS, equippedItems, loadedSpells, loadEquippedSelection, SET_STORAGE_KEY, SPELL_SLOT_PREFIX, sumItemStats } from '../lib/equipment'
@@ -73,17 +74,17 @@ export function Sets() {
           <div className="slot-grid">
             {EQUIPMENT_SLOTS.map((slot) => {
               const item = items.find((candidate) => candidate.id === selected[slot])
-              return <div key={slot} className={`slot-card ${activeSlot === slot ? 'active' : ''}`}>
+              return <ItemHoverCard item={item} key={slot}><div className={`slot-card ${activeSlot === slot ? 'active' : ''}`}>
                 <button className="slot-select" onClick={() => chooseSlot(slot)}>{item && <GameImage kind="items" id={item.id} name={item.name} className="slot-sprite" />}<span className="slot-copy"><span>{slot}</span><strong>{item?.name || 'Vacío'}</strong>{item && <small>#{item.id}</small>}</span></button>
                 {item && <button className="slot-remove" onClick={() => removeSlot(slot)} aria-label={`Quitar ${item.name}`} title="Quitar del set"><X size={14} /></button>}
-              </div>
+              </div></ItemHoverCard>
             })}
           </div>
           {magicSlots > 0 && <div className="pouch-config">
             <div className="pouch-heading"><div><span className="eyebrow">PODERES DE {rightHand?.name.toUpperCase()}</span><h4>{magicSlots} espacios disponibles</h4></div><Sparkles size={18} /></div>
             <div className="spell-slot-grid">{spellSlotNames.map((slot, index) => {
               const spell = items.find((item) => item.id === selected[slot])
-              return <div key={slot} className={`spell-slot ${activeSlot === slot ? 'active' : ''}`}><button className="slot-select" onClick={() => chooseSlot(slot)}>{spell ? <GameImage kind="items" id={spell.id} name={spell.name} className="slot-sprite" /> : <span className="spell-number">{index + 1}</span>}<span className="slot-copy"><span>Poder {index + 1}</span><strong>{spell?.name || 'Vacío'}</strong>{spell && <small>Daño base {spell.stats.Magic || 0}</small>}</span></button>{spell && <button className="slot-remove" onClick={() => removeSlot(slot)} aria-label={`Quitar ${spell.name}`}><X size={14} /></button>}</div>
+              return <ItemHoverCard item={spell} key={slot}><div className={`spell-slot ${activeSlot === slot ? 'active' : ''}`}><button className="slot-select" onClick={() => chooseSlot(slot)}>{spell ? <GameImage kind="items" id={spell.id} name={spell.name} className="slot-sprite" /> : <span className="spell-number">{index + 1}</span>}<span className="slot-copy"><span>Poder {index + 1}</span><strong>{spell?.name || 'Vacío'}</strong>{spell && <small>Daño base {spell.stats.Magic || 0}</small>}</span></button>{spell && <button className="slot-remove" onClick={() => removeSlot(slot)} aria-label={`Quitar ${spell.name}`}><X size={14} /></button>}</div></ItemHoverCard>
             })}</div>
             <p>El Análisis de Combate permite elegir cualquiera de estos poderes cargados.</p>
           </div>}
@@ -101,7 +102,7 @@ export function Sets() {
             <label>Nivel máx.<input type="number" min="0" value={maxLevel} onChange={(event) => setMaxLevel(event.target.value)} placeholder="∞" /></label>
           </div>
           <div className="picker-list">
-            {candidates.map((item) => <button key={item.id} className={selected[activeSlot] === item.id ? 'selected' : ''} onClick={() => equip(item)}><GameImage kind="items" id={item.id} name={item.name} className="picker-sprite" /><div><strong>{item.name}</strong><span>#{item.id} · Nivel {item.level} · {activeSlot.startsWith(SPELL_SLOT_PREFIX) ? `Daño base ${item.stats.Magic || 0}` : Object.entries(item.stats).slice(0, 3).map(([name, value]) => `${name} ${value > 0 ? '+' : ''}${value}`).join(' · ') || 'Sin stats'}</span></div><span>{activeSlot.startsWith(SPELL_SLOT_PREFIX) ? 'Cargar' : 'Equipar'}</span></button>)}
+            {candidates.map((item) => <ItemHoverCard item={item} key={item.id}><button className={selected[activeSlot] === item.id ? 'selected' : ''} onClick={() => equip(item)}><GameImage kind="items" id={item.id} name={item.name} className="picker-sprite" /><div><strong>{item.name}</strong><span>#{item.id} · Nivel {item.level} · {activeSlot.startsWith(SPELL_SLOT_PREFIX) ? `Daño base ${item.stats.Magic || 0}` : Object.entries(item.stats).slice(0, 3).map(([name, value]) => `${name} ${value > 0 ? '+' : ''}${value}`).join(' · ') || 'Sin stats'}</span></div><span>{activeSlot.startsWith(SPELL_SLOT_PREFIX) ? 'Cargar' : 'Equipar'}</span></button></ItemHoverCard>)}
             {!candidates.length && <p className="filter-empty">No hay piezas para estos filtros.</p>}
           </div>
         </section>
