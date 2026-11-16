@@ -8,12 +8,14 @@ import {
   Home,
   Menu,
   Swords,
+  UserRound,
   X,
 } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
 export const routes = [
   { id: 'inicio', label: 'Inicio', icon: Home },
+  { id: 'personaje', label: 'Mi personaje', icon: UserRound },
   { id: 'experiencia', label: 'Experiencia', icon: ChartNoAxesCombined },
   { id: 'items', label: 'Ítems', icon: Backpack },
   { id: 'sets', label: 'Armador de sets', icon: Swords },

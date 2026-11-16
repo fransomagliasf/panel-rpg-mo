@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "sync:data": "node scripts/prepare-data.mjs"
+    "sync:data": "node scripts/prepare-data.mjs",
+    "sync:player": "node scripts/sync-player.mjs"
   },
   "dependencies": {
     "lucide-react": "latest",

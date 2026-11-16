@@ -1,0 +1,62 @@
+name: Sync Broar highscore
+
+on:
+  push:
+    paths:
+      - .github/workflows/sync-player.yml
+      - scripts/sync-player.mjs
+  schedule:
+    - cron: '17 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: sync-broar-highscore
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Read the official RPG MO highscore
+        run: npm run sync:player
+        env:
+          PLAYER_NAME: Broar
+      - name: Save the new snapshot
+        shell: bash
+        run: |
+          if git diff --quiet -- public/data/players; then
+            echo "No player data changed."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/players
+          git commit -m "data: update Broar highscore"
+          git push
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

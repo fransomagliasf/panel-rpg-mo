@@ -7,7 +7,7 @@ const sources = [
   { name: 'RPG MO Wiki mirror', url: 'https://github.com/marcqg/rpg-mo-wiki', detail: 'Datos estructurados, documentación y pipeline comunitario.' },
   { name: 'Live Game Data', url: 'https://data.mo.ee', detail: 'Archivos públicos oficiales usados como fuente primaria.' },
   { name: 'MODB', url: 'https://modb.rpgmobob.com', detail: 'Base comunitaria de ítems, mobs, recetas y vendors.' },
-  { name: 'RPG MO Highscores', url: 'https://mo.ee/highscore.html', detail: 'Referencia oficial para una futura importación de personaje.' },
+  { name: 'RPG MO Highscores', url: 'https://mo.ee/highscore.html', detail: 'Fuente oficial del seguimiento automático de Broar.' },
   { name: 'MO Tavern', url: 'https://motavern.com/mb', detail: 'Guías y recursos adicionales de la comunidad.' },
   { name: 'Skill Calculator de zac', url: 'https://docs.google.com/spreadsheets/d/1LuCHslHbPeHmJRL2sQw13nD3CZ0jDqrEGTERNHE05dU/edit?gid=1515831213#gid=1515831213', detail: 'Referencia para mejorar el planificador de oficios.' },
 ]
@@ -27,11 +27,11 @@ export function Sources() {
       <div className="content-grid half">
         <section className="panel">
           <div className="panel-heading"><div><span className="eyebrow">YA DISPONIBLE</span><h3>Primera etapa</h3></div><CheckCircle2 size={20} /></div>
-          <ul className="roadmap-list done"><li>Perfil y objetivo diario local</li><li>Registro de XP y sesiones 2×</li><li>Buscador de ítems con filtros</li><li>Armador de sets y suma de stats</li><li>Calculadora física de XP por mob</li><li>Planificador inicial de oficios</li></ul>
+          <ul className="roadmap-list done"><li>Perfil y objetivo diario local</li><li>Sincronización automática desde Highscores</li><li>Registro de XP y sesiones 2×</li><li>Buscador de ítems con filtros</li><li>Armador de sets y suma de stats</li><li>Calculadora física de XP por mob</li><li>Planificador inicial de oficios</li></ul>
         </section>
         <section className="panel">
           <div className="panel-heading"><div><span className="eyebrow">PRÓXIMOS PASOS</span><h3>Segunda etapa</h3></div><Milestone size={20} /></div>
-          <ul className="roadmap-list"><li>Importación segura desde Highscores</li><li>Seguimiento por habilidad y proyección de nivel</li><li>Comparador de dos sets</li><li>Drop tables y rentabilidad por mob</li><li>Recetas encadenadas y costos de mercado</li><li>Importar backups y sincronizar entre dispositivos</li></ul>
+          <ul className="roadmap-list"><li>Proyección de nivel por habilidad</li><li>Comparador de dos sets</li><li>Drop tables y rentabilidad por mob</li><li>Recetas encadenadas y costos de mercado</li><li>Importar backups y sincronizar entre dispositivos</li></ul>
         </section>
       </div>
       <section className="panel github-callout"><GitBranch size={26} /><div><strong>Proyecto listo para GitHub Pages</strong><span>El deploy se hace con GitHub Actions y no necesita backend.</span></div><a href="https://github.com/fransomagliasf/panel-rpg-mo" target="_blank" rel="noreferrer">Ver repositorio ↗</a></section>

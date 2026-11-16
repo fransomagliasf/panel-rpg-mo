@@ -55,3 +55,26 @@ export type GameDataMeta = {
   sourceCommit: string
   counts: { items: number; mobs: number; recipes: number }
 }
+
+export type PlayerBoard = {
+  board: string
+  score: number
+  position: number
+  lastScore: number
+  lastPosition: number
+}
+
+export type PlayerSnapshot = {
+  capturedAt: string
+  date: string
+  boards: PlayerBoard[]
+}
+
+export type PlayerHistory = {
+  version: number
+  player: string
+  timezone: string
+  sourceUrl: string
+  updatedAt: string
+  snapshots: PlayerSnapshot[]
+}
