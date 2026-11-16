@@ -14,7 +14,7 @@ const bobRawBase = 'https://raw.githubusercontent.com/marcqg/rpg-mo-wiki/main/da
 
 const categories = { 0: 'Armor', 1: 'Food', 2: 'Jewelry', 3: 'Material', 4: 'Tool', 5: 'Weapon', 6: 'Spell', 7: 'Pet Item', 8: 'House', 9: 'Archery' }
 const slots = { 0: 'Helmet', 1: 'Cape', 2: 'Chest', 3: 'Right Hand', 4: 'Left Hand', 5: 'Gloves', 6: 'Boots', 7: 'Amulet', 8: 'Ring', 9: 'None', 10: 'Magic', 11: 'Pants', 12: 'Pet', 16: 'Key', 20: 'Arrow', 21: 'Spirit' }
-const statFields = { aim: 'Aim', power: 'Power', armor: 'Armor', magic: 'Magic', speed: 'Speed', health: 'Health', inventory: 'Inventory' }
+const statFields = { aim: 'Aim', power: 'Power', armor: 'Armor', magic: 'Magic', speed: 'Speed', archery: 'Archery', health: 'Health', inventory: 'Inventory' }
 const requirementFields = {
   min_accuracy: 'Accuracy', min_strength: 'Strength', min_defense: 'Defense', min_health: 'Health', min_magic: 'Magic', min_archery: 'Archery',
   min_alchemy: 'Alchemy', min_breeding: 'Breeding', min_carpentry: 'Carpentry', min_cooking: 'Cooking', min_farming: 'Farming', min_fishing: 'Fishing',
@@ -57,6 +57,11 @@ const items = rawItems.map((item) => {
     wearable: item.params?.wearable === true,
     level: Math.max(0, ...Object.values(requirements)),
     ...(typeof item.params?.price === 'number' ? { price: item.params.price } : {}),
+    ...(typeof item.params?.cooldown === 'number' ? { cooldown: item.params.cooldown } : {}),
+    ...(typeof item.params?.archery === 'number' ? { archery: item.params.archery } : {}),
+    ...(typeof item.params?.archery_damage_boost === 'number' ? { archeryBoost: item.params.archery_damage_boost } : {}),
+    ...(typeof item.params?.magic_slots === 'number' ? { magicSlots: item.params.magic_slots } : {}),
+    ...(typeof item.params?.magic_casts === 'number' ? { magicCasts: item.params.magic_casts } : {}),
     stats: selectedNumbers(item.params, statFields),
     requirements,
   }
@@ -70,6 +75,7 @@ const mobs = rawMobs.filter((mob) => mob.type === 3 && Number.isFinite(mob.param
   accuracy: mob.temp?.total_accuracy ?? 0,
   strength: mob.temp?.total_strength ?? 0,
   defense: mob.temp?.total_defense ?? 0,
+  magicBlock: mob.temp?.magic_block ?? 0,
   locations: Object.keys(mob.locations ?? {}),
 })).sort((a, b) => a.combatLevel - b.combatLevel || a.name.localeCompare(b.name))
 

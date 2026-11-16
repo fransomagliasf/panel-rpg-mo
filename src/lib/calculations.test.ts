@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { combatXp, estimateMobCombat, meleeMaxHit, physicalHitChance, totalXpForLevel, xpForNextLevel } from './calculations'
+import { combatXp, estimateMagicCombat, estimateMobCombat, meleeMaxHit, physicalHitChance, totalXpForLevel, xpForNextLevel } from './calculations'
 
 describe('RPG MO experience calculations', () => {
   it('matches the documented early level table', () => {
@@ -35,5 +35,11 @@ describe('combat estimates', () => {
   it('projects more XP per hour against the same health with less defense', () => {
     const input = { accuracyLevel: 90, strengthLevel: 90, aim: 250, power: 250, style: 'accurate' as const, attackSeconds: 2, betweenKillsSeconds: 1 }
     expect(estimateMobCombat(100, 50, input).xpPerHour).toBeGreaterThan(estimateMobCombat(100, 150, input).xpPerHour)
+  })
+
+  it('applies defense and magic block to spell damage', () => {
+    const input = { magicLevel: 50, spellPenetration: 0, baseDamage: 20, castSeconds: 2, betweenKillsSeconds: 1 }
+    expect(estimateMagicCombat(100, 100, 20, input).maxHit).toBe(8)
+    expect(estimateMagicCombat(100, 50, 0, input).maxHit).toBe(20)
   })
 })

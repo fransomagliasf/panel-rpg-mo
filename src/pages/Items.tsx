@@ -1,4 +1,4 @@
-import { Filter, Search, SlidersHorizontal } from 'lucide-react'
+import { ArrowDown, ArrowUp, Filter, LayoutGrid, List, Search, SlidersHorizontal } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { ErrorMessage, Loading } from '../components/Ui'
 import { GameImage } from '../components/GameImage'
@@ -6,6 +6,24 @@ import { loadItems } from '../lib/data'
 import { formatNumber } from '../lib/calculations'
 import { itemInLevelRange } from '../lib/items'
 import type { Item } from '../types'
+
+type ViewMode = 'cards' | 'table'
+type SortKey = 'level' | 'image' | 'name' | 'skill' | 'slot' | 'power' | 'aim' | 'armor' | 'magic' | 'speed' | 'cooldown' | 'archery' | 'archeryBoost'
+
+const skillText = (item: Item) => Object.entries(item.requirements).map(([name, value]) => `${name} ${value}`).join(' · ') || '—'
+const sortValue = (item: Item, key: SortKey): string | number | undefined => ({
+  level: item.level, image: item.id, name: item.name, skill: skillText(item), slot: item.slot,
+  power: item.stats.Power, aim: item.stats.Aim, armor: item.stats.Armor, magic: item.stats.Magic, speed: item.stats.Speed,
+  cooldown: item.cooldown, archery: item.archery, archeryBoost: item.archeryBoost,
+})[key]
+
+const columns: Array<{ key: SortKey; label: string }> = [
+  { key: 'level', label: 'Level' }, { key: 'image', label: 'Imagen' }, { key: 'name', label: 'Item' },
+  { key: 'skill', label: 'Skill' }, { key: 'slot', label: 'Ranura' }, { key: 'power', label: 'Power' },
+  { key: 'aim', label: 'Aim' }, { key: 'armor', label: 'Armor' }, { key: 'magic', label: 'Magic' },
+  { key: 'speed', label: 'Speed' }, { key: 'cooldown', label: '- % cooldown' }, { key: 'archery', label: 'Archery' },
+  { key: 'archeryBoost', label: '% Archery boost' },
+]
 
 export function Items() {
   const [items, setItems] = useState<Item[]>([])
@@ -16,9 +34,13 @@ export function Items() {
   const [minLevel, setMinLevel] = useState('')
   const [maxLevel, setMaxLevel] = useState('')
   const [limit, setLimit] = useState(48)
+  const [view, setView] = useState<ViewMode>(() => localStorage.getItem('mo-tracker-item-view') === 'table' ? 'table' : 'cards')
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
   useEffect(() => { loadItems().then(setItems).catch((reason: Error) => setError(reason.message)) }, [])
-  useEffect(() => setLimit(48), [query, category, slot, minLevel, maxLevel])
+  useEffect(() => setLimit(view === 'table' ? 100 : 48), [query, category, slot, minLevel, maxLevel, view])
+  useEffect(() => localStorage.setItem('mo-tracker-item-view', view), [view])
 
   const categories = useMemo(() => ['Todas', ...new Set(items.map((item) => item.category))], [items])
   const slots = useMemo(() => ['Todos', ...new Set(items.map((item) => item.slot).filter((name) => name !== 'None'))], [items])
@@ -31,6 +53,20 @@ export function Items() {
       itemInLevelRange(item, minLevel, maxLevel),
     )
   }, [items, query, category, slot, minLevel, maxLevel])
+  const sorted = useMemo(() => [...filtered].sort((a, b) => {
+    const aValue = sortValue(a, sortKey)
+    const bValue = sortValue(b, sortKey)
+    if (aValue === undefined && bValue === undefined) return 0
+    if (aValue === undefined) return 1
+    if (bValue === undefined) return -1
+    const comparison = typeof aValue === 'number' && typeof bValue === 'number' ? aValue - bValue : String(aValue).localeCompare(String(bValue), 'es', { numeric: true })
+    return sortDirection === 'asc' ? comparison : -comparison
+  }), [filtered, sortKey, sortDirection])
+
+  const sortBy = (key: SortKey) => {
+    if (sortKey === key) setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDirection('asc') }
+  }
 
   if (error) return <ErrorMessage message={error} />
   if (!items.length) return <Loading />
@@ -48,13 +84,26 @@ export function Items() {
         <label className="level-filter"><span>Nivel mín.</span><input type="number" min="0" value={minLevel} onChange={(event) => setMinLevel(event.target.value)} placeholder="0" /></label>
         <label className="level-filter"><span>Nivel máx.</span><input type="number" min="0" value={maxLevel} onChange={(event) => setMaxLevel(event.target.value)} placeholder="∞" /></label>
         <span className="result-count">{formatNumber(filtered.length)} resultados</span>
+        <div className="view-toggle" aria-label="Modo de visualización"><button className={view === 'cards' ? 'active' : ''} onClick={() => setView('cards')} title="Tarjetas"><LayoutGrid size={16} /></button><button className={view === 'table' ? 'active' : ''} onClick={() => setView('table')} title="Tabla"><List size={17} /></button></div>
       </section>
-      <section className="item-grid">
-        {filtered.slice(0, limit).map((item) => <ItemCard item={item} key={item.id} />)}
-      </section>
-      {limit < filtered.length && <button className="secondary-button centered" onClick={() => setLimit(limit + 48)}>Mostrar más</button>}
+      {view === 'cards' ? <section className="item-grid">{sorted.slice(0, limit).map((item) => <ItemCard item={item} key={item.id} />)}</section> : <ItemTable items={sorted.slice(0, limit)} sortKey={sortKey} sortDirection={sortDirection} sortBy={sortBy} />}
+      {limit < sorted.length && <button className="secondary-button centered" onClick={() => setLimit(limit + (view === 'table' ? 100 : 48))}>Mostrar más</button>}
     </div>
   )
+}
+
+function ItemTable({ items, sortKey, sortDirection, sortBy }: { items: Item[]; sortKey: SortKey; sortDirection: 'asc' | 'desc'; sortBy: (key: SortKey) => void }) {
+  const value = (item: Item, key: SortKey) => {
+    if (key === 'image') return <GameImage kind="items" id={item.id} name={item.name} className="table-item-sprite" />
+    if (key === 'name') return <strong>{item.name}</strong>
+    if (key === 'skill') return skillText(item)
+    if (key === 'slot') return item.slot === 'None' ? '—' : item.slot
+    if (key === 'cooldown') return item.cooldown === undefined ? '—' : `-${Math.round(item.cooldown * 100)}%`
+    if (key === 'archeryBoost') return item.archeryBoost === undefined ? '—' : `${Math.round(item.archeryBoost * 100)}%`
+    const raw = sortValue(item, key)
+    return raw === undefined ? '—' : raw
+  }
+  return <section className="panel item-table-panel"><div className="item-table-wrap"><table className="item-data-table"><thead><tr>{columns.map((column) => <th key={column.key} aria-sort={sortKey === column.key ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'}><button onClick={() => sortBy(column.key)}>{column.label}{sortKey === column.key && (sortDirection === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />)}</button></th>)}</tr></thead><tbody>{items.map((item) => <tr key={item.id}>{columns.map((column) => <td key={column.key}>{value(item, column.key)}</td>)}</tr>)}</tbody></table></div></section>
 }
 
 export function ItemCard({ item, compact = false }: { item: Item; compact?: boolean }) {

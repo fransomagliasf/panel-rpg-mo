@@ -36,6 +36,14 @@ export type CombatEstimateInput = {
   doubleXp?: boolean
 }
 
+export type MagicCombatEstimateInput = {
+  magicLevel: number
+  spellPenetration: number
+  baseDamage: number
+  castSeconds: number
+  betweenKillsSeconds: number
+}
+
 export function combatXp(health: number, style: FightStyle, doubleXp = false) {
   const multiplier = doubleXp ? 2 : 1
   const result = { accuracy: 0, strength: 0, defense: 0, health: 0, total: 0 }
@@ -102,4 +110,16 @@ export function estimateMobCombat(health: number, targetDefense: number, input: 
     xpPerKill: xp.total,
     xpPerHour: xp.total * killsPerHour,
   }
+}
+
+export function estimateMagicCombat(health: number, targetDefense: number, magicBlock: number, input: MagicCombatEstimateInput) {
+  const defenseReduction = Math.min(1, Math.max(0, input.magicLevel + input.spellPenetration) / Math.max(1, targetDefense))
+  const blockReduction = 1 - Math.min(100, Math.max(0, magicBlock)) / 100
+  const maxHit = Math.max(0, input.baseDamage * defenseReduction * blockReduction)
+  const minHit = 0
+  const averageDamagePerCast = Math.max(0.01, maxHit / 2)
+  const casts = Math.max(1, health / averageDamagePerCast)
+  const fightSeconds = casts * Math.max(0.2, input.castSeconds)
+  const killsPerHour = 3600 / (fightSeconds + Math.max(0, input.betweenKillsSeconds))
+  return { minHit, maxHit, averageDamagePerCast, casts, fightSeconds, killsPerHour, defenseReduction, blockReduction }
 }

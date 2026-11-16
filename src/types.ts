@@ -23,6 +23,11 @@ export type Item = {
   wearable: boolean
   level: number
   price?: number
+  cooldown?: number
+  archery?: number
+  archeryBoost?: number
+  magicSlots?: number
+  magicCasts?: number
   stats: Record<string, number>
   requirements: Record<string, number>
 }
@@ -35,6 +40,7 @@ export type Mob = {
   accuracy: number
   strength: number
   defense: number
+  magicBlock: number
   locations: string[]
 }
 
