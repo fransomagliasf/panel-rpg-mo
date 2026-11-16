@@ -21,6 +21,7 @@ export type Item = {
   category: string
   slot: string
   wearable: boolean
+  level: number
   price?: number
   stats: Record<string, number>
   requirements: Record<string, number>

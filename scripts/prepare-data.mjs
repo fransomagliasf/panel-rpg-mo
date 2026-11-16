@@ -14,7 +14,12 @@ const rawBase = 'https://raw.githubusercontent.com/marcqg/rpg-mo-wiki/main/data/
 const categories = { 0: 'Armor', 1: 'Food', 2: 'Jewelry', 3: 'Material', 4: 'Tool', 5: 'Weapon', 6: 'Spell', 7: 'Pet Item', 8: 'House', 9: 'Archery' }
 const slots = { 0: 'Helmet', 1: 'Cape', 2: 'Chest', 3: 'Right Hand', 4: 'Left Hand', 5: 'Gloves', 6: 'Boots', 7: 'Amulet', 8: 'Ring', 9: 'None', 10: 'Magic', 11: 'Pants', 12: 'Pet', 16: 'Key', 20: 'Arrow', 21: 'Spirit' }
 const statFields = { aim: 'Aim', power: 'Power', armor: 'Armor', magic: 'Magic', speed: 'Speed', health: 'Health', inventory: 'Inventory' }
-const requirementFields = { min_accuracy: 'Accuracy', min_strength: 'Strength', min_defense: 'Defense', min_magic: 'Magic', min_archery: 'Archery', min_health: 'Health' }
+const requirementFields = {
+  min_accuracy: 'Accuracy', min_strength: 'Strength', min_defense: 'Defense', min_health: 'Health', min_magic: 'Magic', min_archery: 'Archery',
+  min_alchemy: 'Alchemy', min_breeding: 'Breeding', min_carpentry: 'Carpentry', min_cooking: 'Cooking', min_farming: 'Farming', min_fishing: 'Fishing',
+  min_fletching: 'Fletching', min_forging: 'Forging', min_fungiculture: 'Fungiculture', min_jewelry: 'Jewelry', min_mining: 'Mining',
+  min_wizardry: 'Wizardry', min_woodcutting: 'Woodcutting',
+}
 
 async function readSource(file) {
   if (localSource) return JSON.parse(await readFile(path.join(localSource, 'data', 'game', file), 'utf8'))
@@ -31,16 +36,20 @@ await mkdir(outputDirectory, { recursive: true })
 const [rawItems, rawMobs, rawRecipes] = await Promise.all([readSource('items.json'), readSource('mobs.json'), readSource('recipes.json')])
 const itemNames = new Map(rawItems.map((item) => [item.id, item.n]))
 
-const items = rawItems.map((item) => ({
-  id: item.id,
-  name: item.n,
-  category: categories[item.t] ?? `Unknown ${item.t}`,
-  slot: slots[item.params?.slot] ?? 'None',
-  wearable: item.params?.wearable === true,
-  ...(typeof item.params?.price === 'number' ? { price: item.params.price } : {}),
-  stats: selectedNumbers(item.params, statFields),
-  requirements: selectedNumbers(item.params, requirementFields),
-})).sort((a, b) => a.name.localeCompare(b.name))
+const items = rawItems.map((item) => {
+  const requirements = selectedNumbers(item.params, requirementFields)
+  return {
+    id: item.id,
+    name: item.n,
+    category: categories[item.t] ?? `Unknown ${item.t}`,
+    slot: slots[item.params?.slot] ?? 'None',
+    wearable: item.params?.wearable === true,
+    level: Math.max(0, ...Object.values(requirements)),
+    ...(typeof item.params?.price === 'number' ? { price: item.params.price } : {}),
+    stats: selectedNumbers(item.params, statFields),
+    requirements,
+  }
+}).sort((a, b) => a.name.localeCompare(b.name))
 
 const mobs = rawMobs.filter((mob) => mob.type === 3 && Number.isFinite(mob.params?.combat_level) && Number.isFinite(mob.params?.health) && mob.params.health > 0).map((mob) => ({
   id: mob.id,

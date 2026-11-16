@@ -4,6 +4,7 @@ import { ErrorMessage, Loading } from '../components/Ui'
 import { GameImage } from '../components/GameImage'
 import { loadItems } from '../lib/data'
 import { formatNumber } from '../lib/calculations'
+import { itemInLevelRange } from '../lib/items'
 import type { Item } from '../types'
 
 export function Items() {
@@ -12,10 +13,12 @@ export function Items() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('Todas')
   const [slot, setSlot] = useState('Todos')
+  const [minLevel, setMinLevel] = useState('')
+  const [maxLevel, setMaxLevel] = useState('')
   const [limit, setLimit] = useState(48)
 
   useEffect(() => { loadItems().then(setItems).catch((reason: Error) => setError(reason.message)) }, [])
-  useEffect(() => setLimit(48), [query, category, slot])
+  useEffect(() => setLimit(48), [query, category, slot, minLevel, maxLevel])
 
   const categories = useMemo(() => ['Todas', ...new Set(items.map((item) => item.category))], [items])
   const slots = useMemo(() => ['Todos', ...new Set(items.map((item) => item.slot).filter((name) => name !== 'None'))], [items])
@@ -24,9 +27,10 @@ export function Items() {
     return items.filter((item) =>
       (!normalized || item.name.toLowerCase().includes(normalized) || String(item.id) === normalized) &&
       (category === 'Todas' || item.category === category) &&
-      (slot === 'Todos' || item.slot === slot),
+      (slot === 'Todos' || item.slot === slot) &&
+      itemInLevelRange(item, minLevel, maxLevel),
     )
-  }, [items, query, category, slot])
+  }, [items, query, category, slot, minLevel, maxLevel])
 
   if (error) return <ErrorMessage message={error} />
   if (!items.length) return <Loading />
@@ -41,6 +45,8 @@ export function Items() {
         <div className="filter-label"><SlidersHorizontal size={17} /> Filtros</div>
         <label><Filter size={15} /><select value={category} onChange={(event) => setCategory(event.target.value)}>{categories.map((name) => <option key={name}>{name}</option>)}</select></label>
         <label><select value={slot} onChange={(event) => setSlot(event.target.value)}>{slots.map((name) => <option key={name}>{name}</option>)}</select></label>
+        <label className="level-filter"><span>Nivel mín.</span><input type="number" min="0" value={minLevel} onChange={(event) => setMinLevel(event.target.value)} placeholder="0" /></label>
+        <label className="level-filter"><span>Nivel máx.</span><input type="number" min="0" value={maxLevel} onChange={(event) => setMaxLevel(event.target.value)} placeholder="∞" /></label>
         <span className="result-count">{formatNumber(filtered.length)} resultados</span>
       </section>
       <section className="item-grid">
@@ -57,7 +63,7 @@ export function ItemCard({ item, compact = false }: { item: Item; compact?: bool
   return (
     <article className={`item-card ${compact ? 'compact' : ''}`}>
       <div className="item-card-top"><GameImage kind="items" id={item.id} name={item.name} className="item-glyph" /><div><span>#{item.id} · {item.category}</span><h3>{item.name}</h3></div></div>
-      <div className="item-meta"><span>{item.slot !== 'None' ? item.slot : 'Sin ranura'}</span>{item.price !== undefined && <span>{formatNumber(item.price)} 🪙</span>}</div>
+      <div className="item-meta"><span>{item.slot !== 'None' ? item.slot : 'Sin ranura'} · Nivel {item.level}</span>{item.price !== undefined && <span>{formatNumber(item.price)} 🪙</span>}</div>
       {!!stats.length && <div className="stat-chips">{stats.slice(0, 6).map(([name, value]) => <span key={name}><small>{name}</small><strong>{value > 0 ? '+' : ''}{value}</strong></span>)}</div>}
       {!!requirements.length && <p className="requirements">Requiere {requirements.map(([name, value]) => `${name} ${value}`).join(' · ')}</p>}
     </article>

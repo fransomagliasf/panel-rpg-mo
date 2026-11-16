@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { ErrorMessage, Loading, StatCard } from '../components/Ui'
 import { GameImage } from '../components/GameImage'
 import { loadItems } from '../lib/data'
+import { itemInLevelRange } from '../lib/items'
 import type { Item } from '../types'
 
 const visibleSlots = ['Helmet', 'Cape', 'Chest', 'Pants', 'Gloves', 'Boots', 'Amulet', 'Ring', 'Left Hand', 'Right Hand', 'Magic', 'Pet', 'Arrow', 'Spirit']
@@ -13,6 +14,9 @@ export function Sets() {
   const [selected, setSelected] = useState<Record<string, number>>(() => JSON.parse(localStorage.getItem('mo-tracker-set') || '{}'))
   const [activeSlot, setActiveSlot] = useState('Helmet')
   const [query, setQuery] = useState('')
+  const [category, setCategory] = useState('Todas')
+  const [minLevel, setMinLevel] = useState('')
+  const [maxLevel, setMaxLevel] = useState('')
 
   useEffect(() => { loadItems().then(setItems).catch((reason: Error) => setError(reason.message)) }, [])
   useEffect(() => localStorage.setItem('mo-tracker-set', JSON.stringify(selected)), [selected])
@@ -26,7 +30,13 @@ export function Sets() {
     Object.entries(item.requirements).forEach(([name, value]) => { max[name] = Math.max(max[name] || 0, value) })
     return max
   }, {} as Record<string, number>), [equipped])
-  const candidates = items.filter((item) => item.slot === activeSlot && item.name.toLowerCase().includes(query.toLowerCase())).slice(0, 80)
+  const categories = useMemo(() => ['Todas', ...new Set(items.filter((item) => item.slot === activeSlot).map((item) => item.category))], [items, activeSlot])
+  const candidates = items.filter((item) =>
+    item.slot === activeSlot &&
+    item.name.toLowerCase().includes(query.toLowerCase()) &&
+    (category === 'Todas' || item.category === category) &&
+    itemInLevelRange(item, minLevel, maxLevel),
+  ).slice(0, 80)
 
   if (error) return <ErrorMessage message={error} />
   if (!items.length) return <Loading />
@@ -45,7 +55,7 @@ export function Sets() {
           <div className="slot-grid">
             {visibleSlots.map((slot) => {
               const item = items.find((candidate) => candidate.id === selected[slot])
-              return <button key={slot} className={`slot-card ${activeSlot === slot ? 'active' : ''}`} onClick={() => { setActiveSlot(slot); setQuery('') }}>
+              return <button key={slot} className={`slot-card ${activeSlot === slot ? 'active' : ''}`} onClick={() => { setActiveSlot(slot); setQuery(''); setCategory('Todas') }}>
                 {item && <GameImage kind="items" id={item.id} name={item.name} className="slot-sprite" />}
                 <span className="slot-copy"><span>{slot}</span><strong>{item?.name || 'Vacío'}</strong>{item && <small>#{item.id}</small>}</span>
               </button>
@@ -59,8 +69,14 @@ export function Sets() {
         <section className="panel equipment-picker">
           <div className="panel-heading"><div><span className="eyebrow">{activeSlot.toUpperCase()}</span><h3>Elegir pieza</h3></div></div>
           <div className="small-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={`Buscar para ${activeSlot}…`} /></div>
+          <div className="set-filter-grid">
+            <label>Categoría<select value={category} onChange={(event) => setCategory(event.target.value)}>{categories.map((name) => <option key={name}>{name}</option>)}</select></label>
+            <label>Nivel mín.<input type="number" min="0" value={minLevel} onChange={(event) => setMinLevel(event.target.value)} placeholder="0" /></label>
+            <label>Nivel máx.<input type="number" min="0" value={maxLevel} onChange={(event) => setMaxLevel(event.target.value)} placeholder="∞" /></label>
+          </div>
           <div className="picker-list">
-            {candidates.map((item) => <button key={item.id} className={selected[activeSlot] === item.id ? 'selected' : ''} onClick={() => setSelected({ ...selected, [activeSlot]: item.id })}><GameImage kind="items" id={item.id} name={item.name} className="picker-sprite" /><div><strong>{item.name}</strong><span>#{item.id} · {Object.entries(item.stats).slice(0, 3).map(([name, value]) => `${name} ${value > 0 ? '+' : ''}${value}`).join(' · ') || 'Sin stats'}</span></div><span>Equipar</span></button>)}
+            {candidates.map((item) => <button key={item.id} className={selected[activeSlot] === item.id ? 'selected' : ''} onClick={() => setSelected({ ...selected, [activeSlot]: item.id })}><GameImage kind="items" id={item.id} name={item.name} className="picker-sprite" /><div><strong>{item.name}</strong><span>#{item.id} · Nivel {item.level} · {Object.entries(item.stats).slice(0, 3).map(([name, value]) => `${name} ${value > 0 ? '+' : ''}${value}`).join(' · ') || 'Sin stats'}</span></div><span>Equipar</span></button>)}
+            {!candidates.length && <p className="filter-empty">No hay piezas para estos filtros.</p>}
           </div>
         </section>
       </div>
