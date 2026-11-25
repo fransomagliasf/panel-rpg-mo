@@ -3,7 +3,7 @@
   "player": "Broar",
   "timezone": "America/Argentina/Buenos_Aires",
   "sourceUrl": "https://rpg-de2.mo.ee/playerskills?n=Broar",
-  "updatedAt": "2026-11-24T22:25:06.870Z",
+  "updatedAt": "2026-11-25T08:30:35.292Z",
   "snapshots": [
     {
       "capturedAt": "2026-11-16T00:01:32Z",
@@ -2339,6 +2339,124 @@
           "board": "mining",
           "score": 77,
           "position": 6200,
+          "lastScore": 73,
+          "lastPosition": 8182
+        },
+        {
+          "board": "archery",
+          "score": 39,
+          "position": 5232,
+          "lastScore": 39,
+          "lastPosition": 5213
+        },
+        {
+          "board": "skill_quest",
+          "score": 106,
+          "position": 8367,
+          "lastScore": 106,
+          "lastPosition": 8334
+        },
+        {
+          "board": "kill_quest",
+          "score": 1253,
+          "position": 313,
+          "lastScore": 1214,
+          "lastPosition": 310
+        }
+      ]
+    },
+    {
+      "capturedAt": "2026-11-25T08:30:35.292Z",
+      "date": "2026-11-25",
+      "boards": [
+        {
+          "board": "total",
+          "score": 913,
+          "position": 6129,
+          "lastScore": 906,
+          "lastPosition": 6222
+        },
+        {
+          "board": "total_xp",
+          "score": 413,
+          "position": 2816,
+          "lastScore": 394,
+          "lastPosition": 2857
+        },
+        {
+          "board": "accuracy",
+          "score": 92,
+          "position": 2757,
+          "lastScore": 92,
+          "lastPosition": 2747
+        },
+        {
+          "board": "strength",
+          "score": 90,
+          "position": 2957,
+          "lastScore": 90,
+          "lastPosition": 2951
+        },
+        {
+          "board": "defense",
+          "score": 95,
+          "position": 2557,
+          "lastScore": 94,
+          "lastPosition": 2839
+        },
+        {
+          "board": "health",
+          "score": 97,
+          "position": 2912,
+          "lastScore": 96,
+          "lastPosition": 3059
+        },
+        {
+          "board": "magic",
+          "score": 89,
+          "position": 2688,
+          "lastScore": 89,
+          "lastPosition": 2678
+        },
+        {
+          "board": "woodcutting",
+          "score": 37,
+          "position": 20497,
+          "lastScore": 37,
+          "lastPosition": 20432
+        },
+        {
+          "board": "fishing",
+          "score": 86,
+          "position": 2602,
+          "lastScore": 86,
+          "lastPosition": 2580
+        },
+        {
+          "board": "cooking",
+          "score": 74,
+          "position": 4477,
+          "lastScore": 74,
+          "lastPosition": 4466
+        },
+        {
+          "board": "jewelry",
+          "score": 55,
+          "position": 5313,
+          "lastScore": 54,
+          "lastPosition": 5481
+        },
+        {
+          "board": "forging",
+          "score": 62,
+          "position": 4632,
+          "lastScore": 62,
+          "lastPosition": 4619
+        },
+        {
+          "board": "mining",
+          "score": 77,
+          "position": 6201,
           "lastScore": 73,
           "lastPosition": 8182
         },
